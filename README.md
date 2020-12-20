@@ -1,0 +1,1 @@
+# ros_example_torch_classifier
