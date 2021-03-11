@@ -1,0 +1,5 @@
+<launch>
+  <param name="string"  value="mystring" />
+  <test test-name="test_dataset1"   pkg="ros_example_torch_classifier" type="test_dataset.py" />
+  <test test-name="test_splitting1" pkg="ros_example_torch_classifier" type="test_splitting.py" />
+</launch>

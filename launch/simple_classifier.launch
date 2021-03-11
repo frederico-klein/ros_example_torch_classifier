@@ -1,0 +1,10 @@
+<launch>
+<!-- This will be called from another node and should have standardized inputs and outputs -->
+  <node name="a_classifier" pkg="ros_example_torch_classifier" type="simple_classifier.py" output="screen">
+    <!-- parameters to configure this classifier should be here, not on the code -->
+    <!-- We will have a ton of classifiers and small variations should be here
+    so we can even try some genetic algorithms of optimization techniques -->
+    <param name="param1"         type="string"   value="a_value"/>
+    <param name="param2"   type="String" value="a_value"/>
+  </node>
+</launch>
