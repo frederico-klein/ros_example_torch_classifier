@@ -17,7 +17,7 @@ class ClassifierRotator():
 
         return self
 
-    def __exit__(seld, *exc):
+    def __exit__(self, *exc):
         self.get_next.shutdown("\n\texc list: {}\n, {}".format(*exc,exc[0]))
 
     def do_one_thing(self):
@@ -41,7 +41,7 @@ class RosClassifier():
         self.clf_predict = rospy.Service("~predict", Trigger, self.do_predict)
         return self
 
-    def __exit__(seld, *exc):
+    def __exit__(self, *exc):
         self.get_next.shutdown("\n\texc list: {}\n, {}".format(*exc,exc[0]))
 
     def do_classify(self, req):
