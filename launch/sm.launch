@@ -1,0 +1,45 @@
+<launch>
+  <include file="$(find ros_example_torch_classifier)/launch/splitter.launch" >
+    <arg name="dataset_path"        value="a_value"/>
+    <arg name="cv_type"             value="RepeatedStratifiedKFold"/>
+    <arg name="n_splits"            value="5"/>
+    <arg name="n_repeats"           value="2"/>
+    <arg name="seed"                value="22"/>
+    <arg name="use_random_splits"   value="False"/>
+  </include>
+  <node name="state_machine" pkg="ros_example_torch_classifier" type="sm.py" output="screen">
+    <!-- cv_type: RepeatedStratifiedKFold, kfolds, test_train_splits -->
+    <param name="something" type="string" value="coco"/>
+  </node>
+
+  <!-- define tch machines here  -->
+  <!-- note, using weak passwords combined with privileged containers is a really bad idea. -->
+  <!-- also on first connection we need to do `ssh -oHostKeyAlgorithms='ssh-rsa' host` on every host. this should be automated  -->
+  <machine name="tm1" address="torch_machine4.lavine" env-loader="/root/dop_tch/workspace/env.sh" user="root" password="ros_ros"/>
+  <machine name="tm2" address="torch_machine4.poop"   env-loader="/root/dop_tch/workspace/env.sh" user="root" password="ros_ros"/>
+
+  <!-- division by hand here! -->
+
+  <group ns="classifiers1">
+    <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
+    <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >
+      <arg name="machine" value="tm1"/>
+      <arg name="param2" value="a_value"/>
+    </include>
+    <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" /> -->
+  </group>
+
+  <group ns="classifiers2">
+    <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
+    <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >
+      <arg name="machine" value="tm2"/>
+      <arg name="param2" value="a_value"/>
+    </include>
+    <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" >
+      <arg name="machine" value="tm2"/>
+      <arg name="param2" value="a_value"/>
+    </include>
+    <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" /> -->
+  </group>
+
+</launch>

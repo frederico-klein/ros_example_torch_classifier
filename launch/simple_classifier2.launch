@@ -2,8 +2,8 @@
   <arg name="machine" />
   <arg name="param2" default="nothing" />
 <!-- This will be called from another node and should have standardized inputs and outputs -->
-  <node name="a_classifier"
-    pkg="ros_example_torch_classifier" 
+  <node name="a_classifier2"
+    pkg="ros_example_torch_classifier"
     machine="$(arg machine)"
     type="simple_classifier.py" output="screen">
     <!-- parameters to configure this classifier should be here, not on the code -->

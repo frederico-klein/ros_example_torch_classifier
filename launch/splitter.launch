@@ -1,11 +1,17 @@
 <launch>
+  <arg name="dataset_path"        default="a_value"/>
+  <arg name="cv_type"             default="RepeatedStratifiedKFold"/>
+  <arg name="n_splits"            default="5"/>
+  <arg name="n_repeats"           default="2"/>
+  <arg name="seed"                default="22"/>
+  <arg name="use_random_splits"   default="True"/>
   <node name="the_splitter" pkg="ros_example_torch_classifier" type="splitter.py" output="screen">
-    <param name="dataset_path"         type="string"   value="a_value"/>
     <!-- cv_type: RepeatedStratifiedKFold, kfolds, test_train_splits -->
-    <!-- TODO: not implemented: kfolds, test_train_splits -->
-    <param name="cv_type"   type="String" value="RepeatedStratifiedKFold"/>
-
-    <param name="n_splits"    type="int" value="5"/>
-    <param name="n_repeats"   type="int" value="2"/>
+    <param name="dataset_path"      type="string" value="$(arg dataset_path)"/>
+    <param name="cv_type"           type="String" value="$(arg cv_type)"/>
+    <param name="n_splits"          type="int"    value="$(arg n_splits)"/>
+    <param name="n_repeats"         type="int"    value="$(arg n_repeats)"/>
+    <param name="seed"              type="int"    value="$(arg seed)"/>
+    <param name="use_random_splits" type="bool"   value="$(arg use_random_splits)"/>
   </node>
 </launch>
