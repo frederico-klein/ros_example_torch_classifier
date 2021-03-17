@@ -9,7 +9,7 @@ class ClassifierRotator():
     def __init__(self):
         ##each new split I need to spawn a new RosClassifier
         ## I am going to have some services here that do things:
-
+        rospy.init_node("cfr", anonymous=True)
         pass
 
     def __enter__(self):
