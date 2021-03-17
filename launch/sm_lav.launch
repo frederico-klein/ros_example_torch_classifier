@@ -38,10 +38,10 @@
       <arg name="machine" value="tm2"/>
       <arg name="param2" value="a_value"/>
     </include> -->
-    <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" >
+    <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" >
       <arg name="machine" value="tm2"/>
       <arg name="param2" value="a_value"/>
-    </include>
+    </include> -->
     <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier2.launch" /> -->
   </group>
 
