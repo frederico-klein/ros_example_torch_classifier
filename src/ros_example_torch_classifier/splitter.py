@@ -12,14 +12,14 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 class Splitter():
     def __init__(self, dataframe, n_splits=2, n_repeats=2, seed=42, cv_type="RepeatedStratifiedKFold"):
-        if cv_type is "RepeatedStratifiedKFold":
+        if cv_type == "RepeatedStratifiedKFold":
             self.rskf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats,
                  random_state=seed)
         elif cv_type is "kfolds" or cv_type is "test_train_splits":
             #TODO: not implemented: kfolds, test_train_splits
             raise Exception("Cross validation type not yet implemented: %s"%cv_type)
         else:
-            raise Exception("Cross validation type not defined: %s"%cv_type)
+            raise Exception("Cross validation type not defined: %s, type: %s"%(cv_type,type(cv_type)))
         self.data = dataframe
         self.len = len(self.data)
         self.traintalker = None
