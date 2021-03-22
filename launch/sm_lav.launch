@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find ros_example_torch_classifier)/launch/splitter.launch" >
-    <arg name="dataset_path"        value="a_value"/>
+    <arg name="dataset_path"        value="$(find ros_example_torch_classifier)/articles.csv"/>
     <arg name="cv_type"             value="RepeatedStratifiedKFold"/>
     <arg name="n_splits"            value="5"/>
     <arg name="n_repeats"           value="2"/>

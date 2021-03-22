@@ -1,5 +1,5 @@
 <launch>
-  <arg name="dataset_path"        default="a_value"/>
+  <arg name="dataset_path"        default="$(find ros_example_torch_classifier)/articles.csv"/>
   <arg name="cv_type"             default="RepeatedStratifiedKFold"/>
   <arg name="n_splits"            default="5"/>
   <arg name="n_repeats"           default="2"/>
