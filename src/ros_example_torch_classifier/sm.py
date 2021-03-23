@@ -16,6 +16,9 @@ from std_srvs.srv import Trigger, TriggerResponse
 
 ## now I have a training/ test split, go over all classifiers in sequence
 
-get_next_srv = rospy.ServiceProxy("csv_splitter/get_next", Trigger)
+next_split = rospy.ServiceProxy("csv_splitter/get_next", Trigger)
+next_classifier = rospy.ServiceProxy("/classifiers2/a_classifier2_tm2/get_next", Trigger)
+
+
 
 ##do a for loop on each of the classifier groups

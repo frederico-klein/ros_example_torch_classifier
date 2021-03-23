@@ -30,29 +30,59 @@ class Splitter():
     def __enter__(self):
         self.get_next = rospy.Service("~get_next", Trigger, self.tick)
         # self.get_next = rospy.Service("~get_next", Empty, self.tick)
+        bogusX = np.random.rand(self.len,2)
+        bogusY = np.round(np.random.rand(self.len,1))
+        rospy.logdebug(f"self.len: {self.len}")
+        rospy.logdebug(f"bogusX: {bogusX}")
+        rospy.logdebug(f"bogusY: {bogusY}")
+        self.enumerate = enumerate(self.rskf.split(bogusX, bogusY))
         return self
 
-    def  __exit__(self, *exc):
-        self.get_next.shutdown("\n\texc list: {}\n, {}".format(*exc,exc[0]))
+    def stop(self, reason = "No reason given"):
+        self.get_next.shutdown(reason)
+
+    def __exit__(self, *exc):
+        # deregistering services
+        reason = "\n\texc list: {}\n, {}".format(*exc,exc[0])
+        self.stop(reason = reason)
 
     def tick(self,req):
-        self.k = next(self.produce_split())
+        succ, response = self.produce_split()
+
         rospy.logdebug("k: %d"%self.k)
-        return TriggerResponse(success=True, message= "Hello")
+        return TriggerResponse(success=succ, message= response)
         # return EmptyResponse()
 
     def produce_split(self):
-        bogusX = np.random.rand(self.len,2)
-        bogusY = np.round(np.random.rand(self.len,1))
+        response = "OK."
+        try:
+            k, (train, test) = next(self.enumerate )
+        except StopIteration:
+            #rospy.loginfo("Done with current splits.")
+            response = "Done with current splits."
+            self.stop(reason = response)
+            return False, response
+        rospy.logdebug(f"train: {train}")
+        rospy.logdebug(f"test: {train}")
+        rospy.logdebug(f"k: {k}")
+        if self.traintalker is not None:
+            rospy.logdebug("stopping traintalker")
+            self.traintalker.stop("getting next split")
+        if self.testtalker is not None:
+            rospy.logdebug("stopping testtalker")
+            self.testtalker.stop("getting next split")
 
-        for k, (train, test) in enumerate(self.rskf.split(bogusX, bogusY)):
-            self.traintalker = dataset.CsvTalker(name="train", data=self.data.take([train]))
-            self.testtalker = dataset.CsvTalker(name="test", data=self.data.take([test]))
-            yield k
+        self.k = k
+        self.traintalker = dataset.CsvTalker(name="train", data=self.data.take(train))
+        self.traintalker.start()
+        self.testtalker = dataset.CsvTalker(name="test", data=self.data.take(test))
+        self.testtalker.start()
+        return True, response
+
 
 if __name__ == '__main__':
     try:
-        rospy.init_node('csv_splitter', anonymous=True)
+        rospy.init_node('csv_splitter', anonymous=True, log_level=rospy.DEBUG)
 
         n_splits = rospy.get_param("~n_splits", default=5)
         cv_type = rospy.get_param("~cv_type", default="RepeatedStratifiedKFold")

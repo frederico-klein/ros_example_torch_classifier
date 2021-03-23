@@ -4,45 +4,15 @@
 
 import rospy
 from std_srvs.srv import Trigger, TriggerResponse
+from ros_example_torch_classifier.ros_classifier import RosClassifier, ClassifierRotator
 
-class ClassifierRotator():
+class SimpleRosClassifier(RosClassifier):
     def __init__(self):
-        ##each new split I need to spawn a new RosClassifier
-        ## I am going to have some services here that do things:
-        rospy.init_node("cfr", anonymous=True)
-        pass
-
-    def __enter__(self):
-        self.get_next = rospy.Service("~get_next", Trigger, self.do_one_thing)
-
-        return self
-
-    def __exit__(self, *exc):
-        self.get_next.shutdown("\n\texc list: {}\n, {}".format(*exc,exc[0]))
-
-    def do_one_thing(self):
-        with RosClassifier() as rc:
-            rospy.spin()
-
-    def do_something_else(self):
-        pass
-
-
-class RosClassifier():
-    def __init__(self):
+        super(SimpleRosClassifier, self).__init__()
         ##need to set training input
         ##need to set label topic
         ##need to set test topic
         ##need to set test labels
-        pass
-
-    def __enter__(self):
-        self.clf_do = rospy.Service("~classify", Trigger, self.do_classify)
-        self.clf_predict = rospy.Service("~predict", Trigger, self.do_predict)
-        return self
-
-    def __exit__(self, *exc):
-        self.get_next.shutdown("\n\texc list: {}\n, {}".format(*exc,exc[0]))
 
     def do_classify(self, req):
         return TriggerResponse(success=True, message= "Classification done")
@@ -52,7 +22,7 @@ class RosClassifier():
 
 if __name__ == '__main__':
     try:
-        with ClassifierRotator() as cr:
+        with ClassifierRotator(SimpleRosClassifier) as cr:
             rospy.spin()
     except rospy.ROSInterruptException:
             pass

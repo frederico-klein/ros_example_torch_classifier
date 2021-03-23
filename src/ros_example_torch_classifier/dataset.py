@@ -32,24 +32,33 @@ class CsvTalker():
         self.rate = rospy.Rate(10) # 10hz
         self.loop_forever = loop_forever
         self.thread = None
-    def __enter__(self):
-        self.get_next = rospy.Service("~atalk", Empty, self.asynchronous_talk)
-        self.get_single = rospy.Service("~clock", Empty, self.asynchronous_single)
+
+    def start(self):
+        self.get_next = rospy.Service("~"+self.name+"/"+"atalk", Empty, self.asynchronous_talk)
+        self.get_single = rospy.Service("~"+self.name+"/"+"clock", Empty, self.asynchronous_single)
         rospy.logdebug("List of atalk services: %s"%get_service_by_name("atalk"))
         rospy.logdebug("List of clock services: %s"%get_service_by_name("clock"))
         for acol in self.data.columns:
             self.publist.append(rospy.Publisher(self.name+"/"+re.sub("[: ]","_",acol), String, queue_size=10, latch=True))
 
         rospy.loginfo("CsvTalker loaded OK.")
-        return self
 
-    def  __exit__(self, *exc):
+    def stop(self, reason = "No reason given."):
         # deregistering services
-        self.get_next.shutdown("\n\texc list: {}\n".format(*exc))
+        self.get_next.shutdown(reason)
         self.get_single.shutdown("see reason above")
         for pubb in self.publist:
             pubb.unregister()
         rospy.loginfo("CsvTalker unloaded OK.")
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def  __exit__(self, *exc):
+        # deregistering services
+        reason = "\n\texc list: {}\n".format(*exc)
+        self.stop(reason)
 
     def say_single_row(self,row):
         for acol, apublisher in zip(self.data.columns, self.publist ):
