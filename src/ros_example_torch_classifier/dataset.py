@@ -32,6 +32,7 @@ class CsvTalker():
         self.rate = rospy.Rate(10) # 10hz
         self.loop_forever = loop_forever
         self.thread = None
+        self.enumerate = self.data.iterrows()
 
     def start(self):
         self.get_next = rospy.Service("~"+self.name+"/"+"atalk", Empty, self.asynchronous_talk)
@@ -74,7 +75,7 @@ class CsvTalker():
 
     def asingle(self):
         rospy.loginfo("starting dataset iteration .")
-        for index, row in self.data.iterrows():
+        for index, row in self.enumerate: 
             yield self.say_single_row(row)
 
         rospy.loginfo("dataset finished.")
