@@ -2,7 +2,7 @@
   <arg name="machine" />
   <arg name="param2" default="nothing" />
 <!-- This will be called from another node and should have standardized inputs and outputs -->
-  <node name="a_classifier_$(arg machine)"
+  <node name="a_classifier2_$(arg machine)"
     pkg="ros_example_torch_classifier"
     machine="$(arg machine)"
     type="simple_classifier.py" output="screen">
