@@ -15,7 +15,7 @@ class Splitter():
         if cv_type == "RepeatedStratifiedKFold":
             self.rskf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats,
                  random_state=seed)
-        elif cv_type is "kfolds" or cv_type is "test_train_splits":
+        elif cv_type == "kfolds" or cv_type == "test_train_splits":
             #TODO: not implemented: kfolds, test_train_splits
             raise Exception("Cross validation type not yet implemented: %s"%cv_type)
         else:
