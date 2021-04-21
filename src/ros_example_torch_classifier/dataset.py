@@ -5,7 +5,8 @@ import rospy, rosservice
 import torch
 import pandas as pd
 import threading
-from std_msgs.msg import String
+from std_msgs.msg import String, Header
+from ros_example_torch_classifier.msg import StringStamped
 from std_srvs.srv import Empty, EmptyResponse
 import re
 
@@ -24,15 +25,23 @@ def get_service_by_name(service_name):
     return srv_list
 
 class CsvTalker():
-    def __init__(self, name= "",data= "data", loop_forever = True):
+    def __init__(self, name= "",data= "data", loop_forever = True, stamped=False):
         self.name = name
         self.data = data
+        self.stamped = stamped
         # assuming a 1ist row of labels!
         self.publist = []
         self.rate = rospy.Rate(10) # 10hz
         self.loop_forever = loop_forever
         self.thread = None
         self.enumerate = self.data.iterrows()
+        if self.stamped:
+            rospy.logwarn("defined stamped string for publishing")
+            self.message_type = StringStamped
+        else:
+            rospy.logdebug("defined standard string for publishing")
+
+            self.message_type = String
 
     def start(self):
         self.get_next = rospy.Service("~"+self.name+"/"+"atalk", Empty, self.asynchronous_talk)
@@ -40,7 +49,7 @@ class CsvTalker():
         rospy.logdebug("List of atalk services: %s"%get_service_by_name("atalk"))
         rospy.logdebug("List of clock services: %s"%get_service_by_name("clock"))
         for acol in self.data.columns:
-            self.publist.append(rospy.Publisher(self.name+"/"+re.sub("[: ]","_",acol), String, queue_size=10, latch=True))
+            self.publist.append(rospy.Publisher(self.name+"/"+re.sub("[: ]","_",acol), self.message_type, queue_size=10, latch=True))
 
         rospy.loginfo("CsvTalker loaded OK.")
 
@@ -62,10 +71,23 @@ class CsvTalker():
         self.stop(reason)
 
     def say_single_row(self,row):
-        for acol, apublisher in zip(self.data.columns, self.publist ):
-            my_str = row[acol]
-            #rospy.loginfo(my_str)
-            apublisher.publish(str(my_str)) ## making sure it is a string
+        if self.stamped:
+            h = Header()
+            h.stamp = rospy.Time.now() ##making it easier for TimeSynchronizer by using exactly the same time.
+            for acol, apublisher in zip(self.data.columns, self.publist ):
+                my_str = row[acol]
+                #rospy.loginfo(my_str)
+                msg = self.message_type
+                msg.header = h
+                msg.data = str(my_str)
+                apublisher.publish(msg)
+        else:
+            for acol, apublisher in zip(self.data.columns, self.publist ):
+                my_str = row[acol]
+                #rospy.loginfo(my_str)
+                apublisher.publish(str(my_str)) ## making sure it is a string
+
+
 
     def asynchronous_single(self, req):
         rospy.logdebug("called asynchronous_single .")
@@ -75,7 +97,7 @@ class CsvTalker():
 
     def asingle(self):
         rospy.loginfo("starting dataset iteration .")
-        for index, row in self.enumerate: 
+        for index, row in self.enumerate:
             yield self.say_single_row(row)
 
         rospy.loginfo("dataset finished.")

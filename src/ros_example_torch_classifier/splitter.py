@@ -11,7 +11,9 @@ from std_srvs.srv import Trigger, TriggerResponse
 from sklearn.model_selection import RepeatedStratifiedKFold
 
 class Splitter():
-    def __init__(self, dataframe, n_splits=2, n_repeats=2, seed=42, cv_type="RepeatedStratifiedKFold"):
+    def __init__(self, dataframe, n_splits=2, n_repeats=2, seed=42,
+                stamped = True,
+                cv_type="RepeatedStratifiedKFold"):
         if cv_type == "RepeatedStratifiedKFold":
             self.rskf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats,
                  random_state=seed)
@@ -26,6 +28,7 @@ class Splitter():
         self.testtalker = None
         self.k = None
         self.get_next = None
+        self.stamped = stamped
 
     def __enter__(self):
         self.get_next = rospy.Service("~get_next", Trigger, self.tick)
@@ -73,9 +76,9 @@ class Splitter():
             self.testtalker.stop("getting next split")
 
         self.k = k
-        self.traintalker = dataset.CsvTalker(name="train", data=self.data.take(train))
+        self.traintalker = dataset.CsvTalker(name="train", data=self.data.take(train), stamped = self.stamped)
         self.traintalker.start()
-        self.testtalker = dataset.CsvTalker(name="test", data=self.data.take(test))
+        self.testtalker = dataset.CsvTalker(name="test", data=self.data.take(test), stamped = self.stamped)
         self.testtalker.start()
         return True, response
 
@@ -89,6 +92,7 @@ if __name__ == '__main__':
         n_repeats = rospy.get_param("~n_repeats", default=2)
         seed = rospy.get_param("~seed", default=22)
         use_random_splits = rospy.get_param("~use_random_splits", default=True)
+        stamped = rospy.get_param("~stamped", default=True)
         dataset_path = rospy.get_param("~dataset_path", default="articles.csv")
 
         if use_random_splits:
@@ -97,7 +101,12 @@ if __name__ == '__main__':
         else:
             rospy.loginfo("Using fixed seed: %d"%seed)
 
-        with Splitter(pd.read_csv(dataset_path),n_splits=n_splits,n_repeats=n_repeats, cv_type=cv_type, seed=42) as asplitter:
+        with Splitter(  pd.read_csv(dataset_path),
+                        n_splits=n_splits,
+                        n_repeats=n_repeats,
+                        cv_type=cv_type,
+                        stamped=stamped,
+                        seed=42) as asplitter:
             rospy.spin()
 
     except rospy.ROSInterruptException:

@@ -4,14 +4,19 @@
 
 import rospy
 import message_filters
-from std_msgs.msg import String
+#from std_msgs.msg import String ## we need it stamped or we cant use TimeSynchronizer
+from ros_example_torch_classifier.msg import StringStamped
 from std_srvs.srv import Trigger, TriggerResponse
+
+def check_remap(listo):
+    for name in listo:
+        rospy.logdebug("the name that %s is resolving to: %s"%(name, rospy.resolve_name(name)))
 
 class ClassifierRotator():
     def __init__(self, classifier = None):
         ##each new split I need to spawn a new RosClassifier
         ## I am going to have some services here that do things:
-        rospy.init_node("cfr", anonymous=True)
+        rospy.init_node("cfr", anonymous=True, log_level=rospy.DEBUG)
         self.classifier_prototype = classifier
         self.classifier = None
 
@@ -46,8 +51,11 @@ class RosClassifier():
 
         ##need to set training input
         ##need to set label topic
-        self.training_input = message_filters.Subscriber('train_in', String)
-        self.training_label = message_filters.Subscriber('train_label', String)
+
+        check_remap(["train_in", "train_label", "test_in", "test_label"])
+        rospy.logdebug("the name that train_in is resolving to: %s"%rospy.resolve_name("train_in"))
+        self.training_input = message_filters.Subscriber('train_in', StringStamped)
+        self.training_label = message_filters.Subscriber('train_label', StringStamped)
 
         train_sub_pair = [self.training_input, self.training_label]
         self.train_ts = message_filters.TimeSynchronizer(train_sub_pair , 10)
@@ -56,8 +64,8 @@ class RosClassifier():
 
         ##need to set test topic
         ##need to set test labels
-        self.test_input = message_filters.Subscriber('test_in', String)
-        self.test_label = message_filters.Subscriber('test_label', String)
+        self.test_input = message_filters.Subscriber('test_in', StringStamped)
+        self.test_label = message_filters.Subscriber('test_label', StringStamped)
 
         test_sub_pair = [self.test_input, self.test_label]
         self.test_ts = message_filters.TimeSynchronizer(test_sub_pair , 10)
@@ -72,7 +80,7 @@ class RosClassifier():
         #pass
 
     def test_callback(data, label):
-        self.test_data.append((data,label))      
+        self.test_data.append((data,label))
 
     def __enter__(self):
         self.start()
