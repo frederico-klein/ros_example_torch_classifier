@@ -21,7 +21,12 @@
   <!-- division by hand here! -->
 
   <group ns="classifiers1">
-    <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
+    <remap from="train_in"    to="/train/abstract"/>
+    <remap from="train_label" to="/train/notes"/>
+    <remap from="test_in"     to="/test/abstract"/>
+    <remap from="test_label"  to="/test/notes"/>
+
+ 	<!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
     <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >
       <arg name="machine" value="tm1"/>
       <arg name="param2" value="a_value"/>
@@ -33,7 +38,12 @@
   </group>
 
   <group ns="classifiers2">
-    <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
+    <remap from="train_in"    to="/train/abstract"/>
+    <remap from="train_label" to="/train/notes"/>
+    <remap from="test_in"     to="/test/abstract"/>
+    <remap from="test_label"  to="/test/notes"/>
+ 
+ <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
     <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >
       <arg name="machine" value="tm2"/>
       <arg name="param2" value="a_value"/>

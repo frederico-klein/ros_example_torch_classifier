@@ -76,9 +76,13 @@ class Splitter():
             self.testtalker.stop("getting next split")
 
         self.k = k
-        self.traintalker = dataset.CsvTalker(name="train", data=self.data.take(train), stamped = self.stamped)
+        self.traintalker = dataset.CsvTalker(name="train", 
+                loop_forever = False,
+                data=self.data.take(train), stamped = self.stamped)
         self.traintalker.start()
-        self.testtalker = dataset.CsvTalker(name="test", data=self.data.take(test), stamped = self.stamped)
+        self.testtalker = dataset.CsvTalker(name="test", 
+                loop_forever = False,
+                data=self.data.take(test), stamped = self.stamped)
         self.testtalker.start()
         return True, response
 

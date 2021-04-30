@@ -72,14 +72,15 @@ class RosClassifier():
         #self.test_ts = message_filters.ApproximateTimeSynchronizer(test_sub_pair , 10, 0.1, allow_headerless=True)
         self.test_ts.registerCallback(self.test_callback)
 
-    def train_callback(data, label):
+    def train_callback(self, data, label):
         #maybe we just collect everything until we get a do_train
         #this will fail for big dataset strategies where we do not want to keep
         #the whole thing ever, but just
+        rospy.logwarn_once("I'm receiving data.")
         self.train_data.append((data,label))
         #pass
 
-    def test_callback(data, label):
+    def test_callback(self, data, label):
         self.test_data.append((data,label))
 
     def __enter__(self):
@@ -99,9 +100,13 @@ class RosClassifier():
         self.stop(reason = reason)
 
     def do_train(self, req):
+        assert(self.train_data)
+        rospy.logwarn("training not implemented")
         return TriggerResponse(success=True, message= "Stub classification done")
 
     def do_predict(self, req):
+        assert(self.test_data)
+        rospy.logwarn("prediction not implemented")
         return TriggerResponse(success=True, message= "Stub prediction done")
 
 if __name__ == '__main__':

@@ -27,7 +27,9 @@ def get_service_by_name(service_name):
 class CsvTalker():
     def __init__(self, name= "",data= "data", loop_forever = True, stamped=False):
         self.name = name
-        self.data = data
+        rospy.logwarn("using only 100 items from head!\n this was added for testing remove or fix for proper testing")
+        self.data = data.head(100)
+        self._finished = False
         self.stamped = stamped
         # assuming a 1ist row of labels!
         self.publist = []
@@ -43,7 +45,19 @@ class CsvTalker():
 
             self.message_type = String
 
+    @property
+    def finished(self):
+        return self._finished
+
+    @finished.setter
+    def finished(self,value):
+        ##I want this to be a param
+        rospy.set_param('~%s/finished'%self.name, value)
+        self._finished = value
+
+
     def start(self):
+        self.finished = False # will set the param
         self.get_next = rospy.Service("~"+self.name+"/"+"atalk", Empty, self.asynchronous_talk)
         self.get_single = rospy.Service("~"+self.name+"/"+"clock", Empty, self.asynchronous_single)
         rospy.logdebug("List of atalk services: %s"%get_service_by_name("atalk"))
@@ -77,7 +91,7 @@ class CsvTalker():
             for acol, apublisher in zip(self.data.columns, self.publist ):
                 my_str = row[acol]
                 #rospy.loginfo(my_str)
-                msg = self.message_type
+                msg = self.message_type()
                 msg.header = h
                 msg.data = str(my_str)
                 apublisher.publish(msg)
@@ -118,6 +132,7 @@ class CsvTalker():
                 self.say_single_row(row)
                 self.rate.sleep()
             rospy.loginfo("dataset finished.")
+            self.finished = True
             if self.loop_forever:
                 rospy.loginfo("restarting from beginning.")
             else:
