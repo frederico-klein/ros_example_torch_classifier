@@ -12,6 +12,18 @@
     <param name="something" type="string" value="coco"/>
   </node>
 
+ <node name="traintext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
+	<remap from="title" 		to="/train/title"/>
+	<remap from="abstract"		to="/train/abstract"/>
+	<remap from="titleabstract"	to="/train/text"/>
+ </node>
+
+ <node name="testtext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
+	<remap from="title" 		to="/test/title"/>
+	<remap from="abstract"		to="/test/abstract"/>
+	<remap from="titleabstract"	to="/test/text"/>
+ </node>
+
   <!-- define tch machines here  -->
   <!-- note, using weak passwords combined with privileged containers is a really bad idea. -->
   <!-- also on first connection we need to do `ssh -oHostKeyAlgorithms='ssh-rsa' host` on every host. this should be automated  -->
@@ -21,9 +33,9 @@
   <!-- division by hand here! -->
 
   <group ns="classifiers1">
-    <remap from="train_in"    to="/train/abstract"/>
+    <remap from="train_in"    to="/train/text"/>
     <remap from="train_label" to="/train/notes"/>
-    <remap from="test_in"     to="/test/abstract"/>
+    <remap from="test_in"     to="/test/text"/>
     <remap from="test_label"  to="/test/notes"/>
 
  	<!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
@@ -38,9 +50,9 @@
   </group>
 
   <group ns="classifiers2">
-    <remap from="train_in"    to="/train/abstract"/>
+    <remap from="train_in"    to="/train/text"/>
     <remap from="train_label" to="/train/notes"/>
-    <remap from="test_in"     to="/test/abstract"/>
+    <remap from="test_in"     to="/test/text"/>
     <remap from="test_label"  to="/test/notes"/>
  
  <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->

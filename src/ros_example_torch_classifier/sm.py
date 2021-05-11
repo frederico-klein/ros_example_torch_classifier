@@ -60,14 +60,16 @@ class_do()
 rospy.wait_for_service(talk_test_top) ## this is the offline version
 test_talk()
 
-while ( rospy.get_param("/the_splitter/test/finished")):
-    myrate.sleep()
+### this is going to work differently though so we don't need the part underneath
+
+#while ( rospy.get_param("/the_splitter/test/finished")):
+#    myrate.sleep()
 
 ## now we are in the unfinished state, we wait.
 
-while (not rospy.get_param("/the_splitter/test/finished")):
-    myrate.sleep()
+#while (not rospy.get_param("/the_splitter/test/finished")):
+#    myrate.sleep()
 
-class_pd()
+#class_pd()
 
 ##i have data to classify something!

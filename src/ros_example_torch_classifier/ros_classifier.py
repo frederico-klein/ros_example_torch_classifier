@@ -6,11 +6,13 @@ import rospy
 import message_filters
 #from std_msgs.msg import String ## we need it stamped or we cant use TimeSynchronizer
 from ros_example_torch_classifier.msg import StringStamped
+from ros_example_torch_classifier.utils import check_remap
 from std_srvs.srv import Trigger, TriggerResponse
 
-def check_remap(listo):
-    for name in listo:
-        rospy.logdebug("the name that %s is resolving to: %s"%(name, rospy.resolve_name(name)))
+
+#def check_remap(listo):
+#    for name in listo:
+#        rospy.logdebug("the name that %s is resolving to: %s"%(name, rospy.resolve_name(name)))
 
 class ClassifierRotator():
     def __init__(self, classifier = None):

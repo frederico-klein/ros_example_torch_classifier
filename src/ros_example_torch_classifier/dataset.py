@@ -33,7 +33,9 @@ class CsvTalker():
         self.stamped = stamped
         # assuming a 1ist row of labels!
         self.publist = []
-        self.rate = rospy.Rate(10) # 10hz
+        ## so this is really strange. I was hitting a rate limit here with 10hz. 
+        ## TODO: now this 1hz is witchcraft. it possibly need to be a send receive model. 
+        self.rate = rospy.Rate(1) # 1hz
         self.loop_forever = loop_forever
         self.thread = None
         self.enumerate = self.data.iterrows()
@@ -85,7 +87,11 @@ class CsvTalker():
         self.stop(reason)
 
     def say_single_row(self,row):
+        rospy.logdebug("======")
+        rospy.logdebug("called say single row {}".format(row))
+        rospy.logdebug("======")
         if self.stamped:
+            rospy.logdebug("stamped publishing")
             h = Header()
             h.stamp = rospy.Time.now() ##making it easier for TimeSynchronizer by using exactly the same time.
             for acol, apublisher in zip(self.data.columns, self.publist ):
@@ -95,12 +101,18 @@ class CsvTalker():
                 msg.header = h
                 msg.data = str(my_str)
                 apublisher.publish(msg)
+                ## too verbose
+                #rospy.logdebug("should have published topic %s"%acol)
+                #rospy.logdebug("should have published message %s"%(str(msg)))
+ 
         else:
+            rospy.logdebug("unstamped version")
             for acol, apublisher in zip(self.data.columns, self.publist ):
                 my_str = row[acol]
                 #rospy.loginfo(my_str)
-                apublisher.publish(str(my_str)) ## making sure it is a string
 
+                apublisher.publish(str(my_str)) ## making sure it is a string
+                rospy.logdebug("should have published topic %s"%acol)
 
 
     def asynchronous_single(self, req):
@@ -122,14 +134,18 @@ class CsvTalker():
 
     def atalk(self):
         # non-blocking version of talk
+        rospy.loginfo("atalk: starting threaded version of talk")
         self.thread = threading.Thread(target=self.talk)
         self.thread.start()
 
 
     def talk(self):
+        rospy.loginfo("talk called.")
         while not rospy.is_shutdown():
             for index, row in self.data.iterrows():
+                rospy.logdebug("calling say single row")
                 self.say_single_row(row)
+                rospy.logdebug("sleeping")
                 self.rate.sleep()
             rospy.loginfo("dataset finished.")
             self.finished = True
