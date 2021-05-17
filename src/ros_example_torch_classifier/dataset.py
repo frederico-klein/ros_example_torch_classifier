@@ -8,6 +8,7 @@ import threading
 from std_msgs.msg import String, Header
 from ros_example_torch_classifier.msg import StringStamped
 from std_srvs.srv import Empty, EmptyResponse
+from ros_example_torch_classifier.srv import Dump, DumpResponse
 import re
 
 def get_service_by_name(service_name):
@@ -33,6 +34,7 @@ class CsvTalker():
         self.stamped = stamped
         # assuming a 1ist row of labels!
         self.publist = []
+        self.dumplist = []
         ## so this is really strange. I was hitting a rate limit here with 10hz. 
         ## TODO: now this 1hz is witchcraft. it possibly need to be a send receive model. 
         self.rate = rospy.Rate(1) # 1hz
@@ -57,6 +59,14 @@ class CsvTalker():
         rospy.set_param('~%s/finished'%self.name, value)
         self._finished = value
 
+    def df(self, acol,req):
+        fdata = self.data[acol].drop_duplicates() ##maybe we also want to remove NaNs here?
+        rospy.loginfo(acol)
+        rospy.logwarn(self.data["abstract"])
+        rospy.logwarn("dump service called")
+        rospy.logwarn(fdata)
+        odata = " ".join(fdata)
+        return DumpResponse(data=odata)
 
     def start(self):
         self.finished = False # will set the param
@@ -65,16 +75,22 @@ class CsvTalker():
         rospy.logdebug("List of atalk services: %s"%get_service_by_name("atalk"))
         rospy.logdebug("List of clock services: %s"%get_service_by_name("clock"))
         for acol in self.data.columns:
-            self.publist.append(rospy.Publisher(self.name+"/"+re.sub("[: ]","_",acol), self.message_type, queue_size=10, latch=True))
+            pacol = re.sub("[: ]","_",acol)
+            ## for this architecture missing messages is extremely bad, so I will set up a very long queue. it should be fine to do even larger memory wise, since we have text.
+            self.publist.append(rospy.Publisher(self.name+"/"+ pacol, self.message_type, queue_size=20, latch=True))
+            df = lambda x: self.df(acol,x)
+            self.dumplist.append(rospy.Service("~"+self.name+"/"+pacol+"/"+"dump", Dump, df))
 
         rospy.loginfo("CsvTalker loaded OK.")
 
     def stop(self, reason = "No reason given."):
         # deregistering services
         self.get_next.shutdown(reason)
-        self.get_single.shutdown("see reason above")
+        self.get_single.shutdown(reason)
         for pubb in self.publist:
             pubb.unregister()
+        for dumps in self.dumplist:
+            dumps.shutdown(reason)
         rospy.loginfo("CsvTalker unloaded OK.")
 
     def __enter__(self):
@@ -95,15 +111,16 @@ class CsvTalker():
             h = Header()
             h.stamp = rospy.Time.now() ##making it easier for TimeSynchronizer by using exactly the same time.
             for acol, apublisher in zip(self.data.columns, self.publist ):
-                my_str = row[acol]
-                #rospy.loginfo(my_str)
-                msg = self.message_type()
-                msg.header = h
-                msg.data = str(my_str)
-                apublisher.publish(msg)
-                ## too verbose
-                #rospy.logdebug("should have published topic %s"%acol)
-                #rospy.logdebug("should have published message %s"%(str(msg)))
+                if apublisher.get_num_connections() >0: ##avoids publishing if no one is listening
+                    my_str = row[acol]
+                    #rospy.loginfo(my_str)
+                    msg = self.message_type()
+                    msg.header = h
+                    msg.data = str(my_str)
+                    apublisher.publish(msg)
+                    ## too verbose
+                    #rospy.logdebug("should have published topic %s"%acol)
+                    rospy.logdebug("should have published message %s"%(str(msg)))
  
         else:
             rospy.logdebug("unstamped version")
