@@ -17,59 +17,64 @@ from std_srvs.srv import Empty, EmptyResponse
 
 ## now I have a training/ test split, go over all classifiers in sequence
 
-rospy.init_node("state_machine")
+try:
 
-myrate = rospy.Rate(1)
+    rospy.init_node("state_machine")
 
-class_top      = "/classifiers1/a_classifier_tm1/get_next"
-class_do_top   = "/classifiers1/a_classifier_tm1/classify"
-class_pd_top   = "/classifiers1/a_classifier_tm1/predict"
-splitter_top   = "/the_splitter/get_next"
-talk_train_top = "/the_splitter/train/atalk"
-talk_test_top  = "/the_splitter/test/atalk"
+    myrate = rospy.Rate(1)
 
-next_split      = rospy.ServiceProxy(splitter_top   , Trigger)
-next_classifier = rospy.ServiceProxy(class_top      , Trigger)
-just_talk       = rospy.ServiceProxy(talk_train_top , Empty)
-test_talk       = rospy.ServiceProxy(talk_test_top , Empty)
+    class_top      = "/classifiers1/a_classifier_tm1/get_next"
+    class_do_top   = "/classifiers1/a_classifier_tm1/classify"
+    class_pd_top   = "/classifiers1/a_classifier_tm1/predict"
+    splitter_top   = "/the_splitter/get_next"
+    talk_train_top = "/the_splitter/train/atalk"
+    talk_test_top  = "/the_splitter/test/atalk"
 
-class_do        = rospy.ServiceProxy(class_do_top, Trigger)
-class_pd        = rospy.ServiceProxy(class_pd_top, Trigger)
+    next_split      = rospy.ServiceProxy(splitter_top   , Trigger)
+    next_classifier = rospy.ServiceProxy(class_top      , Trigger)
+    just_talk       = rospy.ServiceProxy(talk_train_top , Empty)
+    test_talk       = rospy.ServiceProxy(talk_test_top , Empty)
 
-rospy.wait_for_service(splitter_top)
-next_split()
-rospy.wait_for_service(class_top)
-next_classifier()
-##do a for loop on each of the classifier groups
-rospy.wait_for_service(talk_train_top) ## this is the offline version
-just_talk()
+    class_do        = rospy.ServiceProxy(class_do_top, Trigger)
+    class_pd        = rospy.ServiceProxy(class_pd_top, Trigger)
 
-##I need to check the transition as well. so at some point after just_talk I need to be in a not finished state
+    rospy.wait_for_service(splitter_top)
+    next_split()
+    rospy.wait_for_service(class_top)
+    next_classifier()
+    ##do a for loop on each of the classifier groups
+    rospy.wait_for_service(talk_train_top) ## this is the offline version
+    just_talk()
 
-while ( rospy.get_param("/the_splitter/train/finished")):
-    myrate.sleep()
+    ##I need to check the transition as well. so at some point after just_talk I need to be in a not finished state
 
-## now we are in the unfinished state, we wait.
+    while ( rospy.get_param("/the_splitter/train/finished")):
+        myrate.sleep()
 
-while (not rospy.get_param("/the_splitter/train/finished")):
-    myrate.sleep()
+    ## now we are in the unfinished state, we wait.
 
-class_do()
+    while (not rospy.get_param("/the_splitter/train/finished")):
+        myrate.sleep()
 
-##TODO: this is parallel with the train publishing, so it can be optimized
-rospy.wait_for_service(talk_test_top) ## this is the offline version
-test_talk()
+    class_do()
 
-### this is going to work differently though so we don't need the part underneath
+    ##TODO: this is parallel with the train publishing, so it can be optimized
+    rospy.wait_for_service(talk_test_top) ## this is the offline version
+    test_talk()
 
-#while ( rospy.get_param("/the_splitter/test/finished")):
-#    myrate.sleep()
+    ### this is going to work differently though so we don't need the part underneath
 
-## now we are in the unfinished state, we wait.
+    #while ( rospy.get_param("/the_splitter/test/finished")):
+    #    myrate.sleep()
 
-#while (not rospy.get_param("/the_splitter/test/finished")):
-#    myrate.sleep()
+    ## now we are in the unfinished state, we wait.
 
-#class_pd()
+    #while (not rospy.get_param("/the_splitter/test/finished")):
+    #    myrate.sleep()
 
-##i have data to classify something!
+    #class_pd()
+
+    ##i have data to classify something!
+
+except rospy.ROSInterruptException:
+    pass

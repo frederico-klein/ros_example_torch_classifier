@@ -89,8 +89,8 @@ class Splitter():
 
 if __name__ == '__main__':
     try:
-        #rospy.init_node('csv_splitter', anonymous=True)
-        rospy.init_node('csv_splitter', anonymous=True, log_level=rospy.DEBUG)
+        rospy.init_node('csv_splitter', anonymous=True)
+        #rospy.init_node('csv_splitter', anonymous=True, log_level=rospy.DEBUG)
 
         n_splits = rospy.get_param("~n_splits", default=5)
         cv_type = rospy.get_param("~cv_type", default="RepeatedStratifiedKFold")

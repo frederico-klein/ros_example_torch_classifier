@@ -13,15 +13,15 @@
   </node>
 
  <node name="traintext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
-	<remap from="title" 		to="/train/title"/>
-	<remap from="abstract"		to="/train/abstract"/>
-	<remap from="titleabstract"	to="/train/text"/>
+	<remap from="in1" 		to="/train/title"/>
+	<remap from="in2"		to="/train/abstract"/>
+	<remap from="output"		to="/train/text"/>
  </node>
 
  <node name="testtext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
-	<remap from="title" 		to="/test/title"/>
-	<remap from="abstract"		to="/test/abstract"/>
-	<remap from="titleabstract"	to="/test/text"/>
+	<remap from="in1" 		to="/test/title"/>
+	<remap from="in2"		to="/test/abstract"/>
+	<remap from="output"		to="/test/text"/>
  </node>
 
   <!-- define tch machines here  -->
@@ -34,9 +34,9 @@
 
   <group ns="classifiers1">
     <remap from="train_in"    to="/train/text"/>
-    <remap from="train_label" to="/train/notes"/>
+    <remap from="train_label" to="/train/label"/>
     <remap from="test_in"     to="/test/text"/>
-    <remap from="test_label"  to="/test/notes"/>
+    <remap from="test_label"  to="/test/label"/>
 
  	<!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
     <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >
@@ -51,9 +51,9 @@
 
   <group ns="classifiers2">
     <remap from="train_in"    to="/train/text"/>
-    <remap from="train_label" to="/train/notes"/>
+    <remap from="train_label" to="/train/label"/>
     <remap from="test_in"     to="/test/text"/>
-    <remap from="test_label"  to="/test/notes"/>
+    <remap from="test_label"  to="/test/label"/>
  
  <!-- here I will pre-start all the classifiers to be tested and then just kill them as I get the results?  -->
     <!-- <include file="$(find ros_example_torch_classifier)/launch/simple_classifier.launch" >

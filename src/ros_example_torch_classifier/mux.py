@@ -9,25 +9,51 @@ from ros_example_torch_classifier.utils import check_remap
 ## TODO: make generic ???
 ## we want to read title and abstract and output titleabstract
 
-def append_pair(title, abstract):
-    rospy.loginfo("dddddd")
+def append_pair(in1, in2):
+    rospy.loginfo(in1.index)
     mys = StringStamped()
-    mys.header = title.header
-    mys.data = " ".join([title.data, abstract.data])
-    mypub.publish(mys)
+    if not in1.index == in2.index:
+        rospy.logerr("Index mismatch between equally timestepped frames!\nIndex of input1 is {} and input2 is {}".format(in1.index,in2.index))
+    else:
+        mys.header = in1.header
+        mys.data = " ".join([in1.data, in2.data])
+        mypub.publish(mys)
 
-rospy.init_node("mux", log_level=rospy.DEBUG)
+try:
+    rospy.init_node("mux", log_level=rospy.DEBUG)
 
+    input1 = rospy.resolve_name("in1") # im desperate
+    input2 = rospy.resolve_name("in2") #
+    output = rospy.resolve_name("output")
+    check_remap([input1, input2, output], level="error")
 
-check_remap(["title", "abstract", "titleabstract"], level="error")
-title    = message_filters.Subscriber("title", StringStamped)
-abstract = message_filters.Subscriber("abstract", StringStamped)
+    myrate = rospy.Rate(2)
 
-mypub = rospy.Publisher("titleabstract", StringStamped, queue_size=10 )
+    #rospy.wait_for_message(input1, StringStamped)
+    #rospy.wait_for_message(input2, StringStamped)
 
-muxin = [title, abstract]
+    while(True):
+        for tup in rospy.get_published_topics():
+            rospy.logwarn(tup)
+            if input1 in tup or input2 in tup:            
+                rospy.logerr("Im` OK")
+                break
+        else: ##witchcraft
+            rospy.logwarn("Trust me: Im not OK")
+            myrate.sleep()
+            continue
+        break
 
-ts = message_filters.TimeSynchronizer(muxin, 10)
-ts.registerCallback(append_pair)
+    in1 = message_filters.Subscriber(input1, StringStamped)
+    in2 = message_filters.Subscriber(input2, StringStamped)
 
-rospy.spin()
+    mypub = rospy.Publisher(output, StringStamped, queue_size=10 )
+
+    muxin = [in1, in2]
+
+    ts = message_filters.TimeSynchronizer(muxin, 10)
+    ts.registerCallback(append_pair)
+
+    rospy.spin()
+except rospy.ROSInterruptException:
+    pass

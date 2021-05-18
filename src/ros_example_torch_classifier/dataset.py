@@ -102,20 +102,40 @@ class CsvTalker():
         reason = "\n\texc list: {}\n".format(*exc)
         self.stop(reason)
 
+    def wait_to(self):
+         #another custom behaviour to try and just fix this: if there is no one listening I will not publish!
+        #also, witchcraft: 
+        while (True):
+            for apublisher in self.publist:
+                if apublisher.get_num_connections() > 0:
+                    break
+            else:
+                rospy.logwarn_throttle(1,"No one is subscribed to any of my subtopics. not publishing anything.")
+                continue
+            break
+ 
     def say_single_row(self,row):
         rospy.logdebug("======")
-        rospy.logdebug("called say single row {}".format(row))
+        #rospy.logdebug("called say single row {}".format(row))
         rospy.logdebug("======")
+        self.wait_to()
         if self.stamped:
             rospy.logdebug("stamped publishing")
             h = Header()
             h.stamp = rospy.Time.now() ##making it easier for TimeSynchronizer by using exactly the same time.
             for acol, apublisher in zip(self.data.columns, self.publist ):
-                if apublisher.get_num_connections() >0: ##avoids publishing if no one is listening
+                if  apublisher.get_num_connections() >0: ##avoids publishing if no one is listening
                     my_str = row[acol]
+                    #rospy.loginfo("+++++")
+                    #rospy.loginfo(type(row))
+                    #rospy.logdebug(row)
+                    #rospy.loginfo(dir(row))
+                    #rospy.loginfo(row.name)
+                    #rospy.loginfo("+++++")
                     #rospy.loginfo(my_str)
                     msg = self.message_type()
                     msg.header = h
+                    msg.index = int(row.name) # attention: if this gives you any trouble, replace it with a an orderly index that you reset each time you add new data to this guy.
                     msg.data = str(my_str)
                     apublisher.publish(msg)
                     ## too verbose
@@ -154,7 +174,6 @@ class CsvTalker():
         rospy.loginfo("atalk: starting threaded version of talk")
         self.thread = threading.Thread(target=self.talk)
         self.thread.start()
-
 
     def talk(self):
         rospy.loginfo("talk called.")
