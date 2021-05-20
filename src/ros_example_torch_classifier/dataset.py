@@ -105,12 +105,17 @@ class CsvTalker():
     def wait_to(self):
          #another custom behaviour to try and just fix this: if there is no one listening I will not publish!
         #also, witchcraft: 
+        myrate = rospy.Rate(1)
         while (True):
             for apublisher in self.publist:
+                #rospy.logdebug(apublisher.get_num_connections())
                 if apublisher.get_num_connections() > 0:
                     break
             else:
-                rospy.logwarn_throttle(1,"No one is subscribed to any of my subtopics. not publishing anything.")
+                rospy.logwarn_throttle(3,"No one is subscribed to any of my subtopics. not publishing anything.")
+                myrate.sleep()
+                ##rospy.logdebug(self.publist)
+
                 continue
             break
  
@@ -140,8 +145,8 @@ class CsvTalker():
                     apublisher.publish(msg)
                     ## too verbose
                     #rospy.logdebug("should have published topic %s"%acol)
-                    rospy.logdebug("should have published message %s"%(str(msg)))
- 
+                    #rospy.logdebug("should have published message %s"%(str(msg)))
+                    rospy.logdebug("pub:{}".format(acol))
         else:
             rospy.logdebug("unstamped version")
             for acol, apublisher in zip(self.data.columns, self.publist ):

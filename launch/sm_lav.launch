@@ -24,6 +24,17 @@
 	<remap from="output"		to="/test/text"/>
  </node>
 
+ <node name="trainlabeller" pkg="ros_example_torch_classifier" type="label_parser.py" output="screen">
+	<remap from="in" 		to="/train/notes"/>
+	<remap from="out"		to="/train/label"/>
+ </node>
+
+ <node name="testlabeller" pkg="ros_example_torch_classifier" type="label_parser.py" output="screen">
+	<remap from="in" 		to="/test/notes"/>
+	<remap from="out"		to="/test/label"/>
+ </node>
+
+
   <!-- define tch machines here  -->
   <!-- note, using weak passwords combined with privileged containers is a really bad idea. -->
   <!-- also on first connection we need to do `ssh -oHostKeyAlgorithms='ssh-rsa' host` on every host. this should be automated  -->
