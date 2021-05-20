@@ -9,7 +9,7 @@ import ros_example_torch_classifier.utils as u
 
 
 def callback(ss):
-    print(ss)
+    u.nlogdebug(ss)
     mys = StringStamped()
     mys.index = ss.index
     mys.header = ss.header
@@ -24,7 +24,8 @@ def callback(ss):
     mypub.publish(mys)
 
 try:
-    rospy.init_node("labeller", log_level=rospy.DEBUG)
+    rospy.init_node("labeller")
+#    rospy.init_node("labeller", log_level=rospy.DEBUG)
     mypub = rospy.Publisher("out", StringStamped, queue_size=10)
     rospy.Subscriber("in", StringStamped, callback)
     rospy.spin()
@@ -44,7 +45,7 @@ def old():
     print(articles.shape)
 
     lab_df = articles.loc[articles['labelled']].copy()
-    print("Labelled data: {}".format(len(lab_df)))
+    #print("Labelled data: {}".format(len(lab_df)))
 
     # included list
     includedlist = [("Included" in art) for art in articles["notes"].fillna('') ]
