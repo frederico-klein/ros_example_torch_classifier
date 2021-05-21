@@ -46,14 +46,18 @@ class Splitter():
 
     def update(self):
         rospy.logdebug("splitter update called.")
-        if self.traintalker:
-            self.traintalker.update()
-        else:
-            rospy.logwarn_throttle(1, "traintalker not defined yet. not updating")
-        if self.testtalker:
-            self.testtalker.update()
-        else:
-            rospy.logwarn_throttle(1, "testtalker not defined yet. not updating")
+        try:
+            if self.traintalker:
+                self.traintalker.update()
+            else:
+                rospy.logwarn_throttle(1, "traintalker not defined yet. not updating")
+            if self.testtalker:
+                self.testtalker.update()
+            else:
+                rospy.logwarn_throttle(1, "testtalker not defined yet. not updating")
+            return True
+        except rospy.ROSInterruptException:
+            return False
 
     def __exit__(self, *exc):
         # deregistering services
@@ -124,38 +128,11 @@ if __name__ == '__main__':
                         cv_type=cv_type,
                         stamped=stamped,
                         seed=42) as asplitter:
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
-            rospy.logwarn("hello")
+            rospy.loginfo("Entering splitter loop.")
             while(True):
-                rospy.logwarn("hello, I love you won't you tell me your name")
-                asplitter.update()
+                rospy.logdebug("Splitter update loop.")
+                if not asplitter.update():
+                    break
                 myrate.sleep()
             #rospy.spin()
 

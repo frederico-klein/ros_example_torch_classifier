@@ -94,15 +94,19 @@ class CsvTalker():
         rospy.logdebug("dataset update called.")
         assert threading.current_thread() is threading.main_thread()
         with self.lock: 
+            numconnlist = []
             for apublisher in self.publist:
                ##very verbose
-                rospy.logdebug(apublisher.get_num_connections())
+                #rospy.logdebug(apublisher.get_num_connections())
+                numconnlist.append(apublisher.get_num_connections())
                 if apublisher.get_num_connections() > 0:
                     rospy.logdebug(apublisher.get_num_connections())
-                    rospy.loginfo("Found a subscriber. Will comnmence publishing") 
+                    rospy.logdebug("Found subscriber. Will allow to publishing.")
+                    rospy.loginfo_once("Found a subscriber. Will comnmence publishing") 
                     self.ready = True
                     break
             else:
+                rospy.logdebug("numconnlist {}".format(apublisher.get_num_connections()))
                 rospy.logwarn_throttle(3,"No one is subscribed to any of my subtopics. not publishing anything.")
             
 
