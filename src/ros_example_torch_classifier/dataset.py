@@ -1,29 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import rospy, rosservice
+import rospy
 import torch
 import pandas as pd
 import threading
 from std_msgs.msg import String, Header
-from ros_example_torch_classifier.msg import StringStamped
-from std_srvs.srv import Empty, EmptyResponse
 from ros_example_torch_classifier.srv import Dump, DumpResponse
+from ros_example_torch_classifier.msg import StringStamped
+from ros_example_torch_classifier.utils import get_service_by_name
+from std_srvs.srv import Empty, EmptyResponse
 import re
-
-def get_service_by_name(service_name):
-    """Gets service complete name by name. Useful to debug namespace issues.
-
-    @param service_name: type of service to find
-    @type  service_name: str
-    @return: list of services that have service_name as a part of their name
-    @rtype: [str]
-    """
-    srv_list = []
-    for srv in rosservice.get_service_list():
-        if service_name in srv:
-            srv_list.append(srv)
-    return srv_list
 
 class CsvTalker():
     def __init__(self, name= "",data= "data", loop_forever = True, stamped=False):
@@ -48,6 +35,8 @@ class CsvTalker():
             rospy.logdebug("defined standard string for publishing")
 
             self.message_type = String
+        self.lock = threading.Lock()
+        self.ready = False
 
     @property
     def finished(self):
@@ -101,24 +90,33 @@ class CsvTalker():
         # deregistering services
         reason = "\n\texc list: {}\n".format(*exc)
         self.stop(reason)
-
-    def wait_to(self):
-         #another custom behaviour to try and just fix this: if there is no one listening I will not publish!
-        #also, witchcraft: 
-        myrate = rospy.Rate(1)
-        while (True):
+    def update(self):
+        rospy.logdebug("dataset update called.")
+        assert threading.current_thread() is threading.main_thread()
+        with self.lock: 
             for apublisher in self.publist:
-                #rospy.logdebug(apublisher.get_num_connections())
+               ##very verbose
+                rospy.logdebug(apublisher.get_num_connections())
                 if apublisher.get_num_connections() > 0:
+                    rospy.logdebug(apublisher.get_num_connections())
+                    rospy.loginfo("Found a subscriber. Will comnmence publishing") 
+                    self.ready = True
                     break
             else:
                 rospy.logwarn_throttle(3,"No one is subscribed to any of my subtopics. not publishing anything.")
-                myrate.sleep()
-                ##rospy.logdebug(self.publist)
+            
 
-                continue
-            break
- 
+    def wait_to(self):
+         #another custom behaviour to try and just fix this: if there is no one listening I will not publish! 
+#        myrate = rospy.Rate(1)
+        while (True):
+            #myrate.sleep()
+            rospy.logdebug("I'm literally locked in here.")
+            with self.lock:
+                if self.ready:
+                    break
+            rospy.sleep(1)
+
     def say_single_row(self,row):
         rospy.logdebug("======")
         #rospy.logdebug("called say single row {}".format(row))

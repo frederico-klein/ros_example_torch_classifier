@@ -44,6 +44,17 @@ class Splitter():
     def stop(self, reason = "No reason given"):
         self.get_next.shutdown(reason)
 
+    def update(self):
+        rospy.logdebug("splitter update called.")
+        if self.traintalker:
+            self.traintalker.update()
+        else:
+            rospy.logwarn_throttle(1, "traintalker not defined yet. not updating")
+        if self.testtalker:
+            self.testtalker.update()
+        else:
+            rospy.logwarn_throttle(1, "testtalker not defined yet. not updating")
+
     def __exit__(self, *exc):
         # deregistering services
         reason = "\n\texc list: {}\n, {}".format(*exc,exc[0])
@@ -106,13 +117,47 @@ if __name__ == '__main__':
         else:
             rospy.loginfo("Using fixed seed: %d"%seed)
 
+        myrate = rospy.Rate(1)
         with Splitter(  pd.read_csv(dataset_path),
                         n_splits=n_splits,
                         n_repeats=n_repeats,
                         cv_type=cv_type,
                         stamped=stamped,
                         seed=42) as asplitter:
-            rospy.spin()
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            rospy.logwarn("hello")
+            while(True):
+                rospy.logwarn("hello, I love you won't you tell me your name")
+                asplitter.update()
+                myrate.sleep()
+            #rospy.spin()
 
     except rospy.ROSInterruptException:
         pass

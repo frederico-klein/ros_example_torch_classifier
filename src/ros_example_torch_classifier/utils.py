@@ -1,8 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
+import rosservice
 import rospy
+
+def get_service_by_name(service_name):
+    """Gets service complete name by name. Useful to debug namespace issues.
+
+    @param service_name: type of service to find
+    @type  service_name: str
+    @return: list of services that have service_name as a part of their name
+    @rtype: [str]
+    """
+    srv_list = []
+    for srv in rosservice.get_service_list():
+        if service_name in srv:
+            srv_list.append(srv)
+    return srv_list
 
 # this should probably be done with custom loggers.
 def nlog(logstr, level="info"):

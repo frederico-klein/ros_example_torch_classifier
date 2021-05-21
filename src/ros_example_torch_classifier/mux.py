@@ -26,7 +26,7 @@ try:
     output = rospy.resolve_name("output")
     u.check_remap([input1, input2, output], level="info")
 
-    myrate = rospy.Rate(2)
+    #myrate = rospy.Rate(2)
 
     #rospy.wait_for_message(input1, StringStamped)
     #rospy.wait_for_message(input2, StringStamped)
