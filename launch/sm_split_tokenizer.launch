@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+<launch>
+  <node name="tokenizer" pkg="ros_example_torch_classifier" type="tokenizer.py" output="screen">
+	  <!-- dump0...dumpN all as parameters instead of remaps because we can have many of those -->
+	  <param name="dump0" type="string" value="/the_splitter/all/authors/dump"/>
+	  <param name="dump1" type="string" value="/the_splitter/all/journal/dump"/>
+	  <remap from="text"               to="/train/text/raw"/>
+
+
+  </node>
+
+</launch>

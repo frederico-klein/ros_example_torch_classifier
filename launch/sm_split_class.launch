@@ -1,42 +1,5 @@
-<?xml version="1.0" ?> 
+<?xml version="1.0" ?>
 <launch>
-  <include file="$(find ros_example_torch_classifier)/launch/sm_split_splitter.launch" >
-    <arg name="dataset_path"        value="$(find ros_example_torch_classifier)/articles.csv"/>
-    <arg name="cv_type"             value="RepeatedStratifiedKFold"/>
-    <arg name="n_splits"            value="5"/>
-    <arg name="n_repeats"           value="2"/>
-    <arg name="seed"                value="22"/>
-    <arg name="use_random_splits"   value="False"/>
-  </include>
-  <node name="state_machine" pkg="ros_example_torch_classifier" type="sm.py" output="screen" required="true">
-    <!-- cv_type: RepeatedStratifiedKFold, kfolds, test_train_splits -->
-    <param name="something" type="string" value="coco"/>
-  </node>
-
- <node name="traintext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
-	<remap from="in1" 		to="/train/title"/>
-	<remap from="in2"		to="/train/abstract"/>
-	<remap from="output"		to="/train/text/raw"/>
- </node>
-
- <node name="testtext" pkg="ros_example_torch_classifier" type="mux.py" output="screen">
-	<remap from="in1" 		to="/test/title"/>
-	<remap from="in2"		to="/test/abstract"/>
-	<remap from="output"		to="/test/text/raw"/>
- </node>
-
- <node name="trainlabeller" pkg="ros_example_torch_classifier" type="label_parser.py" output="screen">
-	<remap from="in" 		to="/train/notes"/>
-	<remap from="out"		to="/train/label"/>
- </node>
-
- <node name="testlabeller" pkg="ros_example_torch_classifier" type="label_parser.py" output="screen">
-	<remap from="in" 		to="/test/notes"/>
-	<remap from="out"		to="/test/label"/>
- </node>
-
-
-  <!-- define tch machines here  -->
   <!-- note, using weak passwords combined with privileged containers is a really bad idea. -->
   <!-- also on first connection we need to do `ssh -oHostKeyAlgorithms='ssh-rsa' host` on every host. this should be automated  -->
   <machine name="tm1" address="torch_machine4.lavine" env-loader="/root/dop_tch/workspace/env.sh" user="root" password="ros_ros"/>

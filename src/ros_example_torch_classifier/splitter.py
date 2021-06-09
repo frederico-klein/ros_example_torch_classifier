@@ -3,12 +3,16 @@
 
 import rospy
 import copy
-import ros_example_torch_classifier.dataset as dataset
 import pandas as pd
 import numpy as np
 #from std_srvs.srv import Empty, EmptyResponse
 from std_srvs.srv import Trigger, TriggerResponse
 from sklearn.model_selection import RepeatedStratifiedKFold
+import ros_example_torch_classifier.utils as u
+import ros_example_torch_classifier.dataset as dataset
+
+
+u.VVV = True
 
 class Splitter():
     def __init__(self, dataframe, n_splits=2, n_repeats=2, seed=42,
@@ -29,6 +33,11 @@ class Splitter():
         self.k = None
         self.get_next = None
         self.stamped = stamped
+# this solution will not work for very big datasets, but special care will have to be put here once we want to load specially large sets. 
+# I will keep a copy of the whole set loaded only so I properly dump without needing to iterate through splits or integrate a big part of dataset.py code in here to make it consistent 
+        self.alltalker = dataset.CsvTalker(name="all", loop_forever= False,
+                data=self.data)
+        self.alltalker.start() ## should create the dump services
 
     def __enter__(self):
         self.get_next = rospy.Service("~get_next", Trigger, self.tick)
@@ -45,16 +54,20 @@ class Splitter():
         self.get_next.shutdown(reason)
 
     def update(self):
-        rospy.logdebug("splitter update called.")
+        u.nlogvvv("splitter update called.")
         try:
             if self.traintalker:
+                u.nlogvvv("trying to update traintalker")
                 self.traintalker.update()
             else:
-                rospy.logwarn_throttle(1, "traintalker not defined yet. not updating")
+                u.nlogvvv("traintalker NOT DEFINED. DOING NOTHING")
+                rospy.logwarn_throttle(60, "traintalker not defined yet. not updating")
             if self.testtalker:
+                u.nlogvvv("trying to update testtalker")
                 self.testtalker.update()
             else:
-                rospy.logwarn_throttle(1, "testtalker not defined yet. not updating")
+                u.nlogvvv("testtalker NOT DEFINED. DOING NOTHING")
+                rospy.logwarn_throttle(60, "testtalker not defined yet. not updating")
             return True
         except rospy.ROSInterruptException:
             return False
@@ -130,7 +143,7 @@ if __name__ == '__main__':
                         seed=42) as asplitter:
             rospy.loginfo("Entering splitter loop.")
             while(True):
-                rospy.logdebug("Splitter update loop.")
+                u.nlogvvv("Splitter update loop.")
                 if not asplitter.update():
                     break
                 myrate.sleep()

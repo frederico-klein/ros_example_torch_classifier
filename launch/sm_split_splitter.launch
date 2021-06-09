@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <launch>
   <arg name="dataset_path"        default="$(find ros_example_torch_classifier)/articles.csv"/>
   <arg name="cv_type"             default="RepeatedStratifiedKFold"/>

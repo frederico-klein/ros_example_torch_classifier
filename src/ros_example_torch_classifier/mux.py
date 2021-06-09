@@ -26,13 +26,14 @@ try:
     output = rospy.resolve_name("output")
     u.check_remap([input1, input2, output], level="info")
 
-    #myrate = rospy.Rate(2)
+    myrate = rospy.Rate(1.0/20)
 
     #rospy.wait_for_message(input1, StringStamped)
     #rospy.wait_for_message(input2, StringStamped)
 
     ##this is waiting for the topic without showing that it reads the topic
     u.wait_for_topics([input1, input2])
+    myrate.sleep()
     u.nloginfo("MUX: OK")
  
     in1 = message_filters.Subscriber(input1, StringStamped)

@@ -4,6 +4,8 @@
 import rosservice
 import rospy
 
+VVV = False
+
 def get_service_by_name(service_name):
     """Gets service complete name by name. Useful to debug namespace issues.
 
@@ -17,6 +19,21 @@ def get_service_by_name(service_name):
         if service_name in srv:
             srv_list.append(srv)
     return srv_list
+
+def read_params_with(name):
+    sstr = name +"0"
+    stops = []
+    while (True):
+        try:
+            stops.append(rospy.get_param(sstr))
+            sstr = name+ str(int(sstr.split(name)[-1])+1)
+            nlogvvv(sstr)
+        except KeyError:
+            nlogdebug("No more parametro "+name)
+            break
+    nloginfo(stops)
+    return stops
+
 
 # this should probably be done with custom loggers.
 def nlog(logstr, level="info"):
@@ -46,6 +63,19 @@ def nlogerr(logstr):
     nlog(logstr, level="err")
 def nlogfatal(logstr):
     nlog(logstr, level="fatal")
+
+def nlogvvv(logstr):
+    if VVV:
+        nlog("VVV: "+ logstr, level="debug")
+    else:
+        pass ## nothing will be logged if VVV not set for VVV messages.
+
+def nlogvvvW(logstr):
+    if VVV:
+        nlog("VVV: "+ logstr, level="warning")
+    else:
+        pass ## nothing will be logged if VVV not set for VVV messages.
+
 
 def strip_get_topics():
     pt = []

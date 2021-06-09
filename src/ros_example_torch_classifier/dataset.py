@@ -10,6 +10,7 @@ from ros_example_torch_classifier.srv import Dump, DumpResponse
 from ros_example_torch_classifier.msg import StringStamped
 from ros_example_torch_classifier.utils import get_service_by_name
 from std_srvs.srv import Empty, EmptyResponse
+import ros_example_torch_classifier.utils as u
 import re
 
 class CsvTalker():
@@ -67,8 +68,9 @@ class CsvTalker():
             pacol = re.sub("[: ]","_",acol)
             ## for this architecture missing messages is extremely bad, so I will set up a very long queue. it should be fine to do even larger memory wise, since we have text.
             self.publist.append(rospy.Publisher(self.name+"/"+ pacol, self.message_type, queue_size=20, latch=True))
-            df = lambda x: self.df(acol,x)
-            self.dumplist.append(rospy.Service("~"+self.name+"/"+pacol+"/"+"dump", Dump, df))
+            self.dumplist.append(rospy.Service("~"+self.name+"/"+pacol+"/"+"dump", Dump, lambda x, bound_acol=acol: self.df(bound_acol,x) ))
+            #df = lambda x: self.df(acol,x)
+            #self.dumplist.append(rospy.Service("~"+self.name+"/"+pacol+"/"+"dump", Dump, df))
 
         rospy.loginfo("CsvTalker loaded OK.")
 
@@ -91,6 +93,8 @@ class CsvTalker():
         reason = "\n\texc list: {}\n".format(*exc)
         self.stop(reason)
     def update(self):
+        u.nlogvvvW("Im OKAY!!!!")
+        
         rospy.logdebug("dataset update called.")
         assert threading.current_thread() is threading.main_thread()
         with self.lock: 
